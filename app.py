@@ -2,40 +2,22 @@ import os
 import requests
 import pickle
 
-def download_file_from_google_drive(id, destination):
-    URL = "https://docs.google.com/uc?export=download"
-    session = requests.Session()
+def download_file(url, destination):
+    if not os.path.exists(destination):
+        print(f"Downloading {destination} ...")
+        response = requests.get(url)
+        with open(destination, "wb") as f:
+            f.write(response.content)
+    else:
+        print(f"{destination} already exists, skipping download.")
 
-    response = session.get(URL, params={'id': id}, stream=True)
-    token = None
-    for key, value in response.cookies.items():
-        if key.startswith('download_warning'):
-            token = value
-            break
-
-    if token:
-        params = {'id': id, 'confirm': token}
-        response = session.get(URL, params=params, stream=True)
-
-    CHUNK_SIZE = 32768
-    with open(destination, "wb") as f:
-        for chunk in response.iter_content(CHUNK_SIZE):
-            if chunk:
-                f.write(chunk)
-
-# Create folder if doesn't exist
 os.makedirs("artificats", exist_ok=True)
 
-# Download files from Google Drive by file id
-download_file_from_google_drive("1KXyZ5gE77b70guTvt2u3ilig2LmU0ui7", "artificats/movie_list.pkl")
-download_file_from_google_drive("1AhQyZNHIUnBFsxpVnG3hsD5PIIgu9rPK", "artificats/similarity.pkl")
+movie_list_url = "https://dl.dropboxusercontent.com/scl/fi/jzow4g8h5k8wc70kcap2o/movie_list.pkl"
+similarity_url = "https://dl.dropboxusercontent.com/scl/fi/wgu40u5v6xpcu29sq6y8z/similarity.pkl"
 
-# Load pickle files after download
-with open("artificats/similarity.pkl", "rb") as f:
-    head = f.read(100)
-print("similarity.pkl file starts with:", head[:50])
-
-similarity = pickle.load(open("artificats/similarity.pkl", "rb"))
+download_file(movie_list_url, "artificats/movie_list.pkl")
+download_file(similarity_url, "artificats/similarity.pkl")
 
 movies = pickle.load(open("artificats/movie_list.pkl", "rb"))
 similarity = pickle.load(open("artificats/similarity.pkl", "rb"))
