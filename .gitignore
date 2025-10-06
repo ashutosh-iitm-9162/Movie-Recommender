@@ -1,0 +1,9 @@
+# Ignore large artifacts folder
+artificats/
+
+# Ignore pickled model files
+*.pkl
+
+# Ignore data and models folders
+data/
+models/
