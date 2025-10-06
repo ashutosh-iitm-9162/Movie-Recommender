@@ -1,3 +1,31 @@
+import os
+import requests
+import pickle
+
+def download_file(url, output_path):
+    if not os.path.exists(output_path):
+        print(f"Downloading {output_path} ...")
+        response = requests.get(url)
+        with open(output_path, "wb") as f:
+            f.write(response.content)
+    else:
+        print(f"{output_path} already exists, skipping download.")
+
+# Direct download URLs from Google Drive for your artifact files
+movie_list_url = "https://drive.google.com/uc?export=download&id=1KXyZ5gE77b70guTvt2u3ilig2LmU0ui7"
+similarity_url = "https://drive.google.com/uc?export=download&id=1AhQyZNHIUnBFsxpVnG3hsD5PIIgu9rPK"
+
+# Make sure the folder exists before downloading
+os.makedirs("artificats", exist_ok=True)
+
+# Download files if not already present
+download_file(movie_list_url, "artificats/movie_list.pkl")
+download_file(similarity_url, "artificats/similarity.pkl")
+
+# Now load the files normally
+movies = pickle.load(open("artificats/movie_list.pkl", "rb"))
+similarity = pickle.load(open("artificats/similarity.pkl", "rb"))
+
 import pickle
 import streamlit as st
 import requests
