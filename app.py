@@ -2,29 +2,38 @@ import os
 import requests
 import pickle
 
-def download_file(url, output_path):
-    if not os.path.exists(output_path):
-        print(f"Downloading {output_path} ...")
-        response = requests.get(url)
-        with open(output_path, "wb") as f:
-            f.write(response.content)
-    else:
-        print(f"{output_path} already exists, skipping download.")
+def download_file_from_google_drive(id, destination):
+    URL = "https://docs.google.com/uc?export=download"
+    session = requests.Session()
 
-# Direct download URLs from Google Drive for your artifact files
-movie_list_url = "https://drive.google.com/uc?export=download&id=1KXyZ5gE77b70guTvt2u3ilig2LmU0ui7"
-similarity_url = "https://drive.google.com/uc?export=download&id=1AhQyZNHIUnBFsxpVnG3hsD5PIIgu9rPK"
+    response = session.get(URL, params={'id': id}, stream=True)
+    token = None
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            token = value
+            break
 
-# Make sure the folder exists before downloading
+    if token:
+        params = {'id': id, 'confirm': token}
+        response = session.get(URL, params=params, stream=True)
+
+    CHUNK_SIZE = 32768
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(CHUNK_SIZE):
+            if chunk:
+                f.write(chunk)
+
+# Create folder if doesn't exist
 os.makedirs("artificats", exist_ok=True)
 
-# Download files if not already present
-download_file(movie_list_url, "artificats/movie_list.pkl")
-download_file(similarity_url, "artificats/similarity.pkl")
+# Download files from Google Drive by file id
+download_file_from_google_drive("1KXyZ5gE77b70guTvt2u3ilig2LmU0ui7", "artificats/movie_list.pkl")
+download_file_from_google_drive("1AhQyZNHIUnBFsxpVnG3hsD5PIIgu9rPK", "artificats/similarity.pkl")
 
-# Now load the files normally
+# Load pickle files after download
 movies = pickle.load(open("artificats/movie_list.pkl", "rb"))
 similarity = pickle.load(open("artificats/similarity.pkl", "rb"))
+
 
 import pickle
 import streamlit as st
