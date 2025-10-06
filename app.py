@@ -31,6 +31,12 @@ download_file_from_google_drive("1KXyZ5gE77b70guTvt2u3ilig2LmU0ui7", "artificats
 download_file_from_google_drive("1AhQyZNHIUnBFsxpVnG3hsD5PIIgu9rPK", "artificats/similarity.pkl")
 
 # Load pickle files after download
+with open("artificats/similarity.pkl", "rb") as f:
+    head = f.read(100)
+print("similarity.pkl file starts with:", head[:50])
+
+similarity = pickle.load(open("artificats/similarity.pkl", "rb"))
+
 movies = pickle.load(open("artificats/movie_list.pkl", "rb"))
 similarity = pickle.load(open("artificats/similarity.pkl", "rb"))
 
